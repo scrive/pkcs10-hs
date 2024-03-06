@@ -1,5 +1,5 @@
 name:                pkcs10
-version:             0.2.0.0
+version:             0.3.0.0
 synopsis:            PKCS#10 library
 description:         Please see README.md
 homepage:            https://github.com/fcomb/pkcs10-hs#readme
@@ -28,16 +28,16 @@ library
   hs-source-dirs:      src
   exposed-modules:     Data.X509.PKCS10
   default-language:    Haskell2010
-  build-depends:       base >= 4.3 && < 5
+  build-depends:       base >= 4.14 && < 5
                      , bytestring
-                     , x509
-                     , cryptonite
+                     , crypton-x509
+                     , crypton
                      , pem
                      , asn1-types
                      , asn1-encoding
                      , asn1-parse
 
-test-suite             tests
+test-suite             test
   ghc-options:         -W
   type:                exitcode-stdio-1.0
   default-language:    Haskell2010
@@ -52,9 +52,9 @@ test-suite             tests
                      , tasty-quickcheck
                      , QuickCheck
                      , bytestring
-                     , cryptonite
+                     , crypton
                      , pem
-                     , x509
+                     , crypton-x509
                      , asn1-types
                      , asn1-encoding
                      , asn1-parse
@@ -71,4 +71,4 @@ test-suite             tests
 
 source-repository      head
   type:     git
-  location: git://github.com/fcomb/pkcs10-hs
+  location: git://github.com/scrive/pkcs10-hs

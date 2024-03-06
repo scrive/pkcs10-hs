@@ -35,7 +35,6 @@ module Data.X509.PKCS10
     , fromPEM
     ) where
 
-import           Control.Applicative      ((<$>), (<*>))
 import           Crypto.Hash
 import qualified Crypto.PubKey.DSA        as DSA
 import qualified Crypto.PubKey.RSA        as RSA
@@ -212,7 +211,7 @@ parseSignedCertificationRequest (Start Sequence : xs) =
     where
       parseCertReqInfo xs' =
         case fromASN1 xs' of
-          Right (cri@ CertificationRequestInfo {}, rest) ->
+          Right (cri@CertificationRequestInfo {}, rest) ->
             runParseASN1State (p cri raw) rest
             where
               raw = encodeASN1' DER $ take (length xs' - length rest) xs'
@@ -358,7 +357,7 @@ instance ASN1Object PKCS9Attributes where
                   End (Container Context 0) :
                   rest') =
             Right (PKCS9Attributes $ reverse exts, rest')
-          g exts (rest'@ (Start Sequence : _)) =
+          g exts (rest'@(Start Sequence : _)) =
             case fromASN1 rest' of
               Right (attr, xss) -> g (attr : exts) xss
               Left e -> Left e

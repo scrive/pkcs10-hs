@@ -1,6 +1,5 @@
 module Main where
 
-import           Control.Applicative      ((<$>), (<*>))
 import           Control.Monad
 import           Crypto.Hash
 import qualified Crypto.PubKey.DSA        as DSA
@@ -32,24 +31,24 @@ properties = testGroup "Properties" [qcProps]
 unitTests = testGroup "Unit tests"
   [ testCase "CSR with subject and extension (RSA)" $ do
      req <- defaultRsaCSR subjectAttrs extAttrs
-     checkCSR (csrToSigned req) subjectAttrs extAttrs $ PubKeyRSA rsaPublicKey
+     checkCSR (csrToSigned req) subjectAttrs extAttrs
   , testCase "CSR with empty subject and extension (RSA)" $ do
       req <- defaultRsaCSR emptySubjectAttrs emptyExtAttrs
-      checkCSR (csrToSigned req) emptySubjectAttrs emptyExtAttrs $ PubKeyRSA rsaPublicKey
+      checkCSR (csrToSigned req) emptySubjectAttrs emptyExtAttrs
   , testCase "CSR fixtures (RSA)" $ do
-      checkRsaFixtureCSR "rsa" "rsa1" pemSubjectAttrs pemExtAttrs readRSA
-      checkRsaFixtureCSR "rsa" "rsa2" pemSubjectAttrs emptyExtAttrs readRSA
-      checkRsaFixtureCSR "rsa" "rsa3" emptySubjectAttrs emptyExtAttrs readRSA
+      checkRsaFixtureCSR "rsa1" pemSubjectAttrs pemExtAttrs
+      checkRsaFixtureCSR "rsa2" pemSubjectAttrs emptyExtAttrs
+      checkRsaFixtureCSR "rsa3" emptySubjectAttrs emptyExtAttrs
   , testCase "CSR with subject and extension (DSA)" $ do
       req <- defaultDsaCSR subjectAttrs extAttrs
-      checkCSR (csrToSigned req) subjectAttrs extAttrs $ PubKeyDSA dsaPublicKey
+      checkCSR (csrToSigned req) subjectAttrs extAttrs
   ,  testCase "CSR with empty subject and extension (DSA)" $ do
       req <- defaultDsaCSR emptySubjectAttrs emptyExtAttrs
-      checkCSR (csrToSigned req) emptySubjectAttrs emptyExtAttrs $ PubKeyDSA dsaPublicKey
+      checkCSR (csrToSigned req) emptySubjectAttrs emptyExtAttrs
   , testCase "CSR fixtures (DSA)" $ do
-      checkRsaFixtureCSR "dsa" "dsa1" pemSubjectAttrs pemExtAttrs readDSA
-      checkRsaFixtureCSR "dsa" "dsa2" pemSubjectAttrs emptyExtAttrs readDSA
-      checkRsaFixtureCSR "dsa" "dsa3" emptySubjectAttrs emptyExtAttrs readDSA
+      checkRsaFixtureCSR "dsa1" pemSubjectAttrs pemExtAttrs
+      checkRsaFixtureCSR "dsa2" pemSubjectAttrs emptyExtAttrs
+      checkRsaFixtureCSR "dsa3" emptySubjectAttrs emptyExtAttrs
   ]
 
 qcProps = testGroup "(checked by QuickCheck)"
@@ -94,17 +93,16 @@ property_csr subjectAttrs pubKey = monadicIO $ do
                 PubKeyRSA _ -> defaultRsaCSR subjectAttrs pemExtAttrs
                 PubKeyDSA _ -> defaultDsaCSR subjectAttrs pemExtAttrs
                 _ -> undefined
-  check <- run $ checkCSR (csrToSigned req) subjectAttrs pemExtAttrs pubKey
+  check <- run $ checkCSR (csrToSigned req) subjectAttrs pemExtAttrs
   assert $ check == ()
 
 readRSA pem = PubKeyRSA $ readRsaPubKey pem 256
 
 readDSA pem = PubKeyDSA $ readDsaPubKey pem
 
-checkRsaFixtureCSR keyName csrName subjectAttrs extAttrs pkf = do
-  keyPem <- readPEMFile $ "test/fixtures/" ++ keyName ++ ".pem"
+checkRsaFixtureCSR csrName subjectAttrs extAttrs = do
   csrPem <- readPEMFile $ "test/fixtures/" ++ csrName ++ ".csr"
-  checkCSR (readCSR csrPem) subjectAttrs extAttrs $ pkf keyPem
+  checkCSR (readCSR csrPem) subjectAttrs extAttrs
 
 defaultRsaCSR subjectAttrs extAttrs = do
   Right req <- generateCSR subjectAttrs extAttrs (KeyPairRSA rsaPublicKey rsaPrivateKey) SHA512
@@ -133,7 +131,7 @@ checkAttrs csr subjectAttrs extAttrs = do
     (attributes certReqInfo) == extAttrs
 
 checkDER csr = do
-  let (Right csr') = (fromDER . toDER) csr
+  let (Right csr') = (fromDER . encodeToDER) csr
   assertBool "DER: csr' == csr" $ (certificationRequest csr') == csr
 
 checkPEM csr = do
@@ -147,19 +145,19 @@ checkPEM csr = do
   assertBool "pemName == NEW CERTIFICATE REQUEST" $
     (pemName . toNewFormatPEM $ csr) == "NEW CERTIFICATE REQUEST"
 
-verifyCSR csr pubKey = do
-  assertBool "verify csr" $ verify csr pubKey
+verifyCSR csr = do
+  assertBool "verify csr" $ verify csr
   let cri = (certificationRequest csr) {
     signature = Signature $ BC.pack "invalid"
   }
   let csr' = csr { certificationRequest = cri }
-  assertBool "verify not valid csr" $ not $ verify csr' pubKey
+  assertBool "verify not valid csr" $ not $ verify csr'
 
-checkCSR csr subjectAttrs extAttrs pubKey = do
+checkCSR csr subjectAttrs extAttrs = do
   checkAttrs (certificationRequest csr) subjectAttrs extAttrs
   checkDER (certificationRequest csr)
   checkPEM (certificationRequest csr)
-  verifyCSR csr pubKey
+  verifyCSR csr
 
 readRsaPubKey :: B.ByteString -> Int -> RSA.PublicKey
 readRsaPubKey bs size =
@@ -213,5 +211,5 @@ readDsaPubKey bs =
 
 readCSR bs =
   case fromDER bs of
-    Right (scr @ SignedCertificationRequest {}) -> scr
+    Right (scr@SignedCertificationRequest {}) -> scr
     Left e -> error . show $ e
