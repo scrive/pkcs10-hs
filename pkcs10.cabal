@@ -1,17 +1,16 @@
+cabal-version:       3.0
+build-type:          Simple
 name:                pkcs10
 version:             0.3.0.0
-synopsis:            PKCS#10 library
-description:         Please see README.md
-homepage:            https://github.com/fcomb/pkcs10-hs#readme
 license:             Apache-2.0
 license-file:        LICENSE
-author:              Timothy Klim <hackage@timothyklim.com>
-maintainer:          Timothy Klim <hackage@timothyklim.com>
-copyright:           Timothy Klim <hackage@timothyklim.com>
 category:            Data
-build-type:          Simple
-cabal-version:       >=1.10
-stability:           experimental
+maintainer:          Scrive AB
+author:              Timothy Klim <hackage@timothyklim.com>
+copyright:           Timothy Klim <hackage@timothyklim.com>
+synopsis:            PKCS#10 library
+description:         Please see README.md
+
 extra-doc-files:     README.md
 extra-source-files:  test/fixtures/dsaparams
                    , test/fixtures/dsa.pem
@@ -23,41 +22,47 @@ extra-source-files:  test/fixtures/dsaparams
                    , test/fixtures/rsa2.csr
                    , test/fixtures/rsa3.csr
 
+tested-with: GHC == { 8.10.7, 9.0.2, 9.2.8, 9.4.8, 9.6.4, 9.8.2 }
+
+source-repository      head
+  type:     git
+  location: git://github.com/scrive/pkcs10-hs
+
 library
   ghc-options:         -W
   hs-source-dirs:      src
   exposed-modules:     Data.X509.PKCS10
   default-language:    Haskell2010
   build-depends:       base >= 4.14 && < 5
-                     , bytestring
-                     , crypton-x509
-                     , crypton
-                     , pem
-                     , asn1-types
                      , asn1-encoding
                      , asn1-parse
+                     , asn1-types
+                     , bytestring
+                     , crypton
+                     , crypton-x509
+                     , pem
 
 test-suite             test
-  ghc-options:         -W
+  ghc-options:         -Wall
   type:                exitcode-stdio-1.0
   default-language:    Haskell2010
   hs-source-dirs:      test
   main-is:             Spec.hs
   other-modules:       Keys
-  build-depends:       base >= 4.3 && < 5
+  build-depends:       base >= 4.14 && < 5
+                     , QuickCheck
+                     , asn1-encoding
+                     , asn1-parse
+                     , asn1-types
+                     , bytestring
+                     , crypton
+                     , crypton-x509
+                     , pem
                      , pkcs10
-                     , transformers
                      , tasty
                      , tasty-hunit
                      , tasty-quickcheck
-                     , QuickCheck
-                     , bytestring
-                     , crypton
-                     , pem
-                     , crypton-x509
-                     , asn1-types
-                     , asn1-encoding
-                     , asn1-parse
+                     , transformers
 
 -- executable             example
 --   ghc-options:         -W
@@ -68,7 +73,3 @@ test-suite             test
 --                      , pkcs10
 --                      , cryptonite
 --                      , x509
-
-source-repository      head
-  type:     git
-  location: git://github.com/scrive/pkcs10-hs
