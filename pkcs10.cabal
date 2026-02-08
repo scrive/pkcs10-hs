@@ -1,7 +1,7 @@
 cabal-version:       3.0
 build-type:          Simple
 name:                pkcs10
-version:             0.3.0.0
+version:             0.3.0.1
 license:             Apache-2.0
 license-file:        LICENSE
 category:            Data
@@ -34,13 +34,13 @@ library
   exposed-modules:     Data.X509.PKCS10
   default-language:    Haskell2010
   build-depends:       base >= 4.14 && < 5
-                     , asn1-encoding
-                     , asn1-parse
-                     , asn1-types
                      , bytestring
                      , crypton
+                     , crypton-asn1-encoding
+                     , crypton-asn1-parse
+                     , crypton-asn1-types
+                     , crypton-pem
                      , crypton-x509
-                     , pem
 
 test-suite             test
   ghc-options:         -Wall
@@ -51,13 +51,13 @@ test-suite             test
   other-modules:       Keys
   build-depends:       base >= 4.14 && < 5
                      , QuickCheck
-                     , asn1-encoding
-                     , asn1-parse
-                     , asn1-types
                      , bytestring
                      , crypton
+                     , crypton-asn1-encoding
+                     , crypton-asn1-parse
+                     , crypton-asn1-types
+                     , crypton-pem
                      , crypton-x509
-                     , pem
                      , pkcs10
                      , tasty
                      , tasty-hunit
