@@ -486,16 +486,21 @@ csrToSigned req = SignedCertificationRequest {
 -- | Verify signed CSR.
 verify :: SignedCertificationRequest -> Bool
 verify csr
-  | PubKeyRSA rsaPubKey <- pubKey, PubKeyALG_RSA <- sigAlg
+  | SignatureALG hashAlg sigAlg <- signatureAlgorithm csr'
+  , PubKeyRSA rsaPubKey <- pubKey
+  , PubKeyALG_RSA <- sigAlg
     = rsaVerify hashAlg rsaPubKey raw sig
-  | PubKeyDSA dsaPubKey <- pubKey, PubKeyALG_DSA <- sigAlg, Just dsaSig <- getDSASig sig, HashSHA1 <- hashAlg
+  | SignatureALG hashAlg sigAlg <- signatureAlgorithm csr'
+  , PubKeyDSA dsaPubKey <- pubKey
+  , PubKeyALG_DSA <- sigAlg
+  , Just dsaSig <- getDSASig sig
+  , HashSHA1 <- hashAlg
     = DSA.verify SHA1 dsaPubKey dsaSig raw
   | otherwise = False
   where
     raw = rawCertificationRequestInfo csr :: BC.ByteString
 
     csr' = certificationRequest csr
-    SignatureALG hashAlg sigAlg = signatureAlgorithm csr'
     Signature sig = signature csr'
     pubKey = subjectPublicKeyInfo $ certificationRequestInfo csr' :: PubKey
 
@@ -555,11 +560,12 @@ fromPEM p =
 -- | Public point to Serilized point helper from
 -- | https://github.com/vincenthz/hs-certificate/blob/f993eadf20072bf31f238c48eb76b2509a5a1c7d/x509-validation/Tests/Certificate.hs#L142
 pubKeyECC :: ECC.PublicKey -> ECC.CurveName ->  PubKey
-pubKeyECC pb curveName =
-  PubKeyEC (PubKeyEC_Named curveName pub)
+pubKeyECC pb curveName = case ECC.public_q pb of
+  ECC.Point x y ->
+    let bs = B.cons 4 (i2ospOf_ bytes x `B.append` i2ospOf_ bytes y)
+        pub = SerializedPoint bs
+    in PubKeyEC (PubKeyEC_Named curveName pub)
+  ECC.PointO -> error "Unexpected point at infinity"
   where
-    ECC.Point x y = ECC.public_q pb
-    pub = SerializedPoint bs
-    bs    = B.cons 4 (i2ospOf_ bytes x `B.append` i2ospOf_ bytes y)
     bits  = ECC.curveSizeBits (ECC.getCurveByName curveName)
     bytes = (bits + 7) `div` 8
