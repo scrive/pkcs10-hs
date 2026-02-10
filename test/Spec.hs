@@ -114,7 +114,10 @@ defaultDsaCSR subjectAttrs extAttrs = do
 
 readPEMFile file = do
   content <- B.readFile file
-  return $ either error (pemContent . head) $ pemParseBS content
+  return $ case pemParseBS content of
+    Left msg -> error $ "Parse failed: " ++ msg
+    Right [] -> error "No PEM certificates"
+    Right (pem:_) -> pemContent pem
 
 decodeFromDER :: ASN1Object o => BC.ByteString -> Either String (o, [ASN1])
 decodeFromDER bs =
@@ -131,15 +134,14 @@ checkAttrs csr subjectAttrs extAttrs = do
     (attributes certReqInfo) == extAttrs
 
 checkDER csr = do
-  let (Right csr') = (fromDER . encodeToDER) csr
-  assertBool "DER: csr' == csr" $ (certificationRequest csr') == csr
+  let csr' = fromDER $ encodeToDER csr
+  assertEqual "DER: csr' == csr" (certificationRequest <$> csr') (Right csr)
 
 checkPEM csr = do
-  let (Right csr') = (fromPEM . toPEM) csr
-  assertBool "PEM: csr' == csr" $ (certificationRequest csr') == csr
-  let (Right csr'') = (fromPEM . toNewFormatPEM) csr
-  assertBool "PEM: csr'' == csr" $
-    (certificationRequest csr'') == csr
+  let csr' = fromPEM $ toPEM csr
+  assertEqual "PEM: csr' == csr" (certificationRequest <$> csr') (Right csr)
+  let csr'' = fromPEM $ toNewFormatPEM csr
+  assertEqual "PEM: csr'' == csr" (certificationRequest <$> csr'') (Right csr)
   assertBool "pemName == CERTIFICATE REQUEST" $
     (pemName . toPEM $ csr) == "CERTIFICATE REQUEST"
   assertBool "pemName == NEW CERTIFICATE REQUEST" $

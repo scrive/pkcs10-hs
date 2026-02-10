@@ -1,7 +1,7 @@
 cabal-version:       3.0
 build-type:          Simple
 name:                pkcs10
-version:             0.3.0.0
+version:             0.4.0.0
 license:             Apache-2.0
 license-file:        LICENSE
 category:            Data
@@ -22,11 +22,11 @@ extra-source-files:  test/fixtures/dsaparams
                    , test/fixtures/rsa2.csr
                    , test/fixtures/rsa3.csr
 
-tested-with: GHC == { 8.10.7, 9.0.2, 9.2.8, 9.4.8, 9.6.4, 9.8.2 }
+tested-with: GHC == { 8.10.7, 9.0.2, 9.2.8, 9.4.8, 9.6.7, 9.8.4, 9.10.3, 9.12.2, 9.14.1 }
 
 source-repository      head
   type:     git
-  location: git://github.com/scrive/pkcs10-hs
+  location: https://github.com/scrive/pkcs10-hs.git
 
 library
   ghc-options:         -W
@@ -34,16 +34,16 @@ library
   exposed-modules:     Data.X509.PKCS10
   default-language:    Haskell2010
   build-depends:       base >= 4.14 && < 5
-                     , asn1-encoding
-                     , asn1-parse
-                     , asn1-types
                      , bytestring
                      , crypton
-                     , crypton-x509
-                     , pem
+                     , crypton-asn1-encoding
+                     , crypton-asn1-parse
+                     , crypton-asn1-types
+                     , crypton-pem
+                     , crypton-x509 >= 1.8.0
 
 test-suite             test
-  ghc-options:         -Wall
+  ghc-options:         -W
   type:                exitcode-stdio-1.0
   default-language:    Haskell2010
   hs-source-dirs:      test
@@ -51,18 +51,16 @@ test-suite             test
   other-modules:       Keys
   build-depends:       base >= 4.14 && < 5
                      , QuickCheck
-                     , asn1-encoding
-                     , asn1-parse
-                     , asn1-types
                      , bytestring
                      , crypton
+                     , crypton-asn1-encoding
+                     , crypton-asn1-types
+                     , crypton-pem
                      , crypton-x509
-                     , pem
                      , pkcs10
                      , tasty
                      , tasty-hunit
                      , tasty-quickcheck
-                     , transformers
 
 -- executable             example
 --   ghc-options:         -W
