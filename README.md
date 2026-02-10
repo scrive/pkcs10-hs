@@ -2,9 +2,9 @@ PKCS#10 library
 =========
 
 [![CI](https://github.com/scrive/pkcs10-hs/actions/workflows/haskell-ci.yml/badge.svg?branch=master)](https://github.com/scrive/pkcs10-hs/actions/workflows/haskell-ci.yml)
-[![Hackage](https://img.shields.io/hackage/v/pkcs10-hs.svg)](https://hackage.haskell.org/package/pkcs10-hs)
-[![Stackage LTS](https://www.stackage.org/package/pkcs10-hs/badge/lts)](https://www.stackage.org/lts/package/pkcs10-hs)
-[![Stackage Nightly](https://www.stackage.org/package/pkcs10-hs/badge/nightly)](https://www.stackage.org/nightly/package/pkcs10-hs)
+[![Hackage](https://img.shields.io/hackage/v/pkcs10.svg)](https://hackage.haskell.org/package/pkcs10)
+[![Stackage LTS](https://www.stackage.org/package/pkcs10/badge/lts)](https://www.stackage.org/lts/package/pkcs10)
+[![Stackage Nightly](https://www.stackage.org/package/pkcs10/badge/nightly)](https://www.stackage.org/nightly/package/pkcs10)
 
 ### Example
 
